@@ -42,4 +42,20 @@ export class CubeGame {
         }
         return true;
     }
+
+    minimum_game(): ColorCount {
+        let minimum: ColorCount = {};
+        for (let round of this.rounds) {
+            for (let color in round) {
+                if (!(color in minimum) || round[color] > minimum[color]) {
+                    minimum[color] = round[color];
+                }
+            }
+        }
+        return minimum;
+    }
+
+    power(): number {
+        return Object.values(this.minimum_game()).reduce((a, b) => a * b, 1);
+    }
 }
