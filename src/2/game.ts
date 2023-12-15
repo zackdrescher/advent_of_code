@@ -1,4 +1,11 @@
+import * as fs from 'fs';
+
 const id_pattern = /Game (\d+):/;
+
+export function read_games(path: string): CubeGame[] {
+    const data = fs.readFileSync(path, 'utf-8').split('\n');
+    return data.map(s => new CubeGame(s));
+}
 
 type ColorCount = { [color: string]: number; };
 

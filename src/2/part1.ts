@@ -1,11 +1,4 @@
-import * as fs from 'fs';
-
-import { CubeGame } from './game';
-
-function read_games(path: string): CubeGame[] {
-    const data = fs.readFileSync(path, 'utf-8').split('\n');
-    return data.map(s => new CubeGame(s));
-}
+import { CubeGame, read_games } from './game';
 
 const bag_config = { red: 12, green: 13, blue: 14 };
 const games = read_games('data/2/input.txt');
