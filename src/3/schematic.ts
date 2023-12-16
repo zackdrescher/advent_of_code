@@ -1,6 +1,4 @@
-const range = (from: number, to: number, step: number = 1): number[] =>
-  [...Array(Math.floor((to - from) / step) + 1)].map((_, i) => from + i * step);
-
+import { range } from "../utils";
 class Position {
   x: number;
   y: number;
