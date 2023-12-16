@@ -1,8 +1,3 @@
-import { get } from "http";
-import { read_lines } from "../utils";
-
-let schematic = read_lines('data/3/example.txt');
-
 const range = (from: number, to: number, step: number = 1): number[] =>
     [...Array(Math.floor((to - from) / step) + 1)].map((_, i) => from + i * step);
 
@@ -52,19 +47,23 @@ class Word {
             new Position(this.x2 + 1, this.y),
         ]
     }
+
+    is_adjacent(position: Position): boolean {
+        return this.get_adjacent().some(p => p.x == position.x && p.y == position.y);
+    }
 }
 
-function is_symbol(s: string): boolean {
+export function is_symbol(s: string): boolean {
     return !parseInt(s) && s != '.' && s != '';
 }
 
-function get_symbol_positions(schematic: string[]): Position[] {
+function get_token_positions(schematic: string[], match: (token: string) => boolean = is_symbol): Position[] {
 
     let postions = []
     for (let i = 0; i < schematic.length; i++) {
         for (let j = 0; j < schematic[i].length; j++) {
             let token = schematic[i][j];
-            if (is_symbol(token)) {
+            if (match(token)) {
                 postions.push(new Position(j, i));
             }
         }
@@ -72,7 +71,7 @@ function get_symbol_positions(schematic: string[]): Position[] {
     return postions;
 }
 
-class Schematic {
+export class Schematic {
     content: string[];
     hieght: number;
     width: number;
@@ -83,7 +82,11 @@ class Schematic {
     }
 
     get_symbol_positions(): Position[] {
-        return get_symbol_positions(this.content);
+        return get_token_positions(this.content);
+    }
+
+    get_gear_positions(): Position[] {
+        return get_token_positions(this.content, (token) => token == '*');
     }
 
     get_postion(position: Position): string {
@@ -102,20 +105,3 @@ class Schematic {
         }).flat();
     }
 }
-
-
-let s = new Schematic(schematic);
-let words = s.get_words();
-
-let parts = words.filter(w => {
-    let adjacent = w.get_adjacent();
-    for (let p of adjacent) {
-        if (is_symbol(s.get_postion(p))) {
-            // console.log(w, p, s.get_postion(p));
-            return true;
-        }
-    }
-    return false;
-})
-
-console.log(parts.map(p => parseInt(p.content)).reduce((a, b) => a + b, 0));
