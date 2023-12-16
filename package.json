@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "watch": "pnpm tsc -w"
+  },
   "devDependencies": {
     "@types/node": "^20.10.4",
     "prettier": "^3.1.1",
