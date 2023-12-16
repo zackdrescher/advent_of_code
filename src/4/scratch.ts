@@ -1,6 +1,6 @@
 import { read_lines } from "../utils";
 
-const id_pattern = /Card (\d+):/;
+const id_pattern = /Card +(\d+):/;
 
 class ScratchCard {
   content: string;
@@ -20,6 +20,7 @@ class ScratchCard {
           .trim()
           .split(" ")
           .map((s) => parseInt(s))
+          .filter((n) => !isNaN(n))
       );
     this.winning_numbers = numbers[0];
     this.player_numbers = numbers[1];
@@ -33,5 +34,6 @@ class ScratchCard {
   }
 }
 
-let cards = read_lines("data/4/example.txt").map((s) => new ScratchCard(s));
+let cards = read_lines("data/4/input.txt").map((s) => new ScratchCard(s));
+console.log(cards);
 console.log(cards.map((c) => c.score()).reduce((a, b) => a + b, 0));
