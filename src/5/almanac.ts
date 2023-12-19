@@ -1,11 +1,7 @@
-import * as fs from "fs";
-
-import { read_lines } from "../utils";
-
 const seed_pattern = /seeds: ((?:\d+\s)+)/;
 const map_pattern = /(\w+)-to-(\w+) map:\s((?:\d+\s?)+)/g;
 
-function parse_seeds(s: string): number[] {
+export function parse_seeds(s: string): number[] {
   return s.match(seed_pattern)![1].split(" ").map(Number);
 }
 
@@ -67,8 +63,13 @@ class Map {
   }
 }
 
-class Almanac {
+export class Almanac {
   maps: Map[];
+
+  static from_string(s: string): Almanac {
+    let matches = s.matchAll(map_pattern);
+    return new Almanac(Array.from(matches).map(Map.from_match));
+  }
 
   constructor(maps: Map[]) {
     this.maps = maps;
@@ -84,17 +85,3 @@ class Almanac {
     return results;
   }
 }
-
-let path = "data/5/example.txt";
-let data = fs.readFileSync(path, "utf-8");
-let seeds = parse_seeds(data);
-
-let matches = data.matchAll(map_pattern);
-
-let a = new Almanac(Array.from(matches).map(Map.from_match));
-
-// console.log(a);
-// console.log(a.map(79));
-
-console.log(seeds);
-console.log(seeds.map((s) => a.map(s).pop()!));
