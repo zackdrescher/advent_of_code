@@ -5,7 +5,7 @@ export function parse_seeds(s: string): number[] {
   return s.match(seed_pattern)![1].split(" ").map(Number);
 }
 
-class Range {
+class RangeMap {
   destination: number;
   source: number;
   length: number;
@@ -27,12 +27,12 @@ class Range {
 class Map {
   from: string;
   to: string;
-  ranges: Range[];
+  ranges: RangeMap[];
 
-  static parse_ranges(s: string): Range[] {
+  static parse_ranges(s: string): RangeMap[] {
     return s.split("\n").map((line) => {
       let [destination, source, length] = line.split(" ").map(Number);
-      return new Range(destination, source, length);
+      return new RangeMap(destination, source, length);
     });
   }
 
@@ -41,7 +41,7 @@ class Map {
     return new Map(from, to, Map.parse_ranges(values));
   }
 
-  constructor(from: string, to: string, ranges: Range[]) {
+  constructor(from: string, to: string, ranges: RangeMap[]) {
     this.from = from;
     this.to = to;
     this.ranges = ranges;
