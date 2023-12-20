@@ -5,22 +5,108 @@ export function parse_seeds(s: string): number[] {
   return s.match(seed_pattern)![1].split(" ").map(Number);
 }
 
-class RangeMap {
-  destination: number;
-  source: number;
+export class Range {
+  start: number;
   length: number;
-  constructor(destination: number, source: number, length: number) {
-    this.destination = destination;
-    this.source = source;
+  static from_start_end(start: number, end: number): Range {
+    return new Range(start, end - start + 1);
+  }
+  constructor(start: number, length: number) {
+    this.start = start;
     this.length = length;
   }
 
-  contains(n: number): boolean {
-    return this.source <= n && n < this.source + this.length;
+  get end(): number {
+    return this.start + this.length - 1;
+  }
+
+  contains_value(n: number): boolean {
+    return this.start <= n && n < this.end;
+  }
+
+  lt(range: Range): boolean {
+    return this.start < range.start;
+  }
+
+  gt(range: Range): boolean {
+    return this.end > range.end;
+  }
+
+  met(range: Range): boolean {
+    return this.end + 1 === range.start;
+  }
+
+  meti(range: Range): boolean {
+    return this.start === range.end + 1;
+  }
+
+  overlaps(range: Range): boolean {
+    return this.contains_value(range.start) || this.contains_value(range.end);
+  }
+
+  during(range: Range): boolean {
+    return range.contains_value(this.start) && range.contains_value(this.end);
+  }
+
+  contains(range: Range): boolean {
+    return this.contains_value(range.start) && this.contains_value(range.end);
+  }
+
+  starts(range: Range): boolean {
+    return this.start === range.start;
+  }
+
+  ends(range: Range): boolean {
+    return this.end === range.end;
+  }
+
+  split_accross(range: Range): Range[] {
+    if (!this.overlaps(range || this.contains(range))) {
+      return [this];
+    }
+    if (this.contains(range)) {
+      return [
+        Range.from_start_end(this.start, range.start - 1),
+        range,
+        Range.from_start_end(range.end + 1, this.end),
+      ];
+    }
+    if (this.lt(range)) {
+      return [
+        Range.from_start_end(this.start, range.start - 1),
+        Range.from_start_end(range.start, this.end),
+      ];
+    } else {
+      return [
+        Range.from_start_end(this.start, range.end),
+        Range.from_start_end(range.end + 1, this.end),
+      ];
+    }
+  }
+}
+
+class RangeMap extends Range {
+  destination: number;
+  constructor(destination: number, source: number, length: number) {
+    super(source, length);
+    this.destination = destination;
+  }
+
+  get destination_range(): Range {
+    return new Range(this.destination, this.length);
   }
 
   map(n: number): number {
-    return this.contains(n) ? this.destination + (n - this.source) : -1;
+    return this.contains_value(n) ? this.destination + (n - this.start) : -1;
+  }
+
+  map_range(range: Range): Range[] {
+    let splits = range.split_accross(this);
+    return splits
+      .flatMap((range) =>
+        Range.from_start_end(this.map(range.start), this.map(range.end))
+      )
+      .sort((a, b) => (a.lt(b) ? -1 : 1));
   }
 }
 
