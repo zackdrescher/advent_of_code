@@ -13,13 +13,12 @@ for (let i = 0; i < seeds.length; i += 2) {
   new_seeds.push(new Range(from, to));
 }
 
-console.log(new_seeds);
 let i = 1;
-let seed = new_seeds[0];
-let rm = a.maps[0].ranges[i];
-console.log(rm);
-console.log(seed.split_accross(rm));
-console.log(rm.map_range(seed));
+let seed = new_seeds[1];
+let rm = a.maps[0].range_maps[i];
+console.log("seed", seed);
+console.log("map", rm);
+console.log("madded seed", rm.map_range(seed));
 
 // console.log(new_seeds.flat().length);
 // console.log(Math.min(...new_seeds.flat().map((s) => a.map(s).pop()!)));

@@ -8,6 +8,15 @@ export function parse_seeds(s: string): number[] {
 export class Range {
   start: number;
   length: number;
+
+  static smooth(ranges: Range[]): Range[] {
+    let sorted = ranges.sort((a, b) => (a.lt(b) ? -1 : 1));
+    let result = [];
+    let current = sorted[0];
+    result.push(current);
+    return result;
+  }
+
   static from_start_end(start: number, end: number): Range {
     return new Range(start, end - start + 1);
   }
@@ -21,7 +30,7 @@ export class Range {
   }
 
   contains_value(n: number): boolean {
-    return this.start <= n && n < this.end;
+    return this.start <= n && n <= this.end;
   }
 
   lt(range: Range): boolean {
@@ -96,15 +105,18 @@ class RangeMap extends Range {
     return new Range(this.destination, this.length);
   }
 
-  map(n: number): number {
-    return this.contains_value(n) ? this.destination + (n - this.start) : -1;
+  map(n: number, miss: number = -1): number {
+    return this.contains_value(n) ? this.destination + (n - this.start) : miss;
   }
 
   map_range(range: Range): Range[] {
     let splits = range.split_accross(this);
     return splits
       .flatMap((range) =>
-        Range.from_start_end(this.map(range.start), this.map(range.end))
+        Range.from_start_end(
+          this.map(range.start, range.start),
+          this.map(range.end, range.end)
+        )
       )
       .sort((a, b) => (a.lt(b) ? -1 : 1));
   }
@@ -113,7 +125,7 @@ class RangeMap extends Range {
 class Map {
   from: string;
   to: string;
-  ranges: RangeMap[];
+  range_maps: RangeMap[];
 
   static parse_ranges(s: string): RangeMap[] {
     return s.split("\n").map((line) => {
@@ -130,7 +142,7 @@ class Map {
   constructor(from: string, to: string, ranges: RangeMap[]) {
     this.from = from;
     this.to = to;
-    this.ranges = ranges;
+    this.range_maps = ranges;
   }
 
   toString(): string {
@@ -138,7 +150,7 @@ class Map {
   }
 
   map(n: number): number {
-    let results = this.ranges
+    let results = this.range_maps
       .map((range) => range.map(n))
       .filter((n) => n >= 0);
     if (results.length > 1) {
@@ -146,6 +158,14 @@ class Map {
     }
     let result = results[0];
     return result >= 0 ? result : n;
+  }
+
+  map_range(range: Range): Range[] {
+    // find Maps rnages overlapwith
+    let overlaps = this.range_maps.filter((rm) => rm.overlaps(range));
+
+    // map range into each overlapping range but
+    // we nee to figure out how to merge the maps which will have differnt splits
   }
 }
 
